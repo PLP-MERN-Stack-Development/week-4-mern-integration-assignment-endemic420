@@ -1,35 +1,58 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { createContext, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import Home from '@/pages/Home';
+import PostDetail from '@/components/PostDetails';
+import CreatePost from '@/components/createPost';
+import Navbar from '@/components/navbar';
+import Login from '@/pages/login';
+import Signup from '@/pages/signup';
+import Dashboard from '@/pages/Dashboard';
+import CategoryManagement from '@/components/CategoryManagement';
+import ProtectedRoute from '@/components/protectedRoute';
+import AdminRoute from '@/components/AdminRoute';
 
-function App() {
-  const [count, setCount] = useState(0)
+// Theme context for dark/light mode
+export const ThemeContext = createContext(null)
+const App = () => {
+  const [theme, setTheme] = useState('light');
+
+  // Toggle between dark and light mode
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      <div className={cn(theme === 'dark' ? 'dark' : '', 'min-h-screen')}>
+        <Router>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/post/:id" element={<PostDetail />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route
+              path="/dashboard"
+              element={<ProtectedRoute element={<Dashboard />} />}
+            />
+            <Route
+              path="/create"
+              element={<ProtectedRoute element={<CreatePost />} />}
+            />
+            <Route
+              path="/edit/:id"
+              element={<ProtectedRoute element={<CreatePost />} />}
+            />
+            <Route
+              path="/categories"
+              element={<AdminRoute element={<CategoryManagement />} />}
+            />
+          </Routes>
+        </Router>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    </ThemeContext.Provider>
+  );
+};
 
-export default App
+export default App;
