@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,43 +8,73 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, logout, isInitialized } = useAuth();
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Fetch user posts and categories
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
+        console.log('Token in Dashboard:', token);
+        if (!token) {
+          throw new Error('No token found');
+        }
         const config = { headers: { Authorization: `Bearer ${token}` } };
+        console.log('Fetching posts with config:', config);
         const [postsRes, categoriesRes] = await Promise.all([
           axios.get(
             selectedCategory
               ? `http://localhost:5000/api/posts/my-posts?categoryId=${selectedCategory}`
               : 'http://localhost:5000/api/posts/my-posts',
             config
-          ), // Update URL
-          axios.get('http://localhost:5000/api/categories'), // Update URL
+          ),
+          axios.get('http://localhost:5000/api/categories'),
         ]);
+        console.log('Posts response:', postsRes.data);
+        console.log('Categories response:', categoriesRes.data);
         setPosts(postsRes.data);
         setCategories(categoriesRes.data);
         setLoading(false);
       } catch (err) {
-        setError('Failed to fetch data');
-        setLoading(false);
+        console.error('Fetch error:', {
+          message: err.message,
+          status: err.response?.status,
+          data: err.response?.data,
+        });
+        setError(
+          err.response?.status === 401
+            ? 'Session expired. Please log in again.'
+            : 'Failed to fetch posts. Please try again.'
+        );
+        if (err.response?.status === 401) {
+          console.log('401 detected, logging out and redirecting to login');
+          logout();
+          navigate('/login', { replace: true });
+        } else {
+          setLoading(false);
+        }
       }
     };
-    fetchData();
-  }, [selectedCategory]);
+    if (isInitialized && user) {
+      console.log('Fetching data for user:', user);
+      fetchData();
+    } else if (isInitialized && !user) {
+      console.log('No user, redirecting to login');
+      setError('Please log in to access the dashboard.');
+      navigate('/login', { replace: true });
+    }
+  }, [user, isInitialized, selectedCategory, logout, navigate]);
 
-  if (loading) {
+  if (!isInitialized || loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <FaSpinner className="h-8 w-8 animate-spin text-gray-600 dark:text-gray-300" />
+        <FaSpinner className="h-8 w-8 animate-spin text-gray-600 dark:text-white" />
       </div>
     );
   }
@@ -56,17 +86,17 @@ const Dashboard = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">
-        Welcome, {user.name}
+        Welcome, {user?.name || 'User'}
       </h1>
       <div className="mb-6">
         <Select onValueChange={setSelectedCategory} value={selectedCategory}>
           <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 text-gray-800 dark:text-white">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
-          <SelectContent className={undefined}>
+          <SelectContent className={undefined} >
             <SelectItem value="" className={undefined}>All Categories</SelectItem>
             {categories.map((category) => (
-              <SelectItem key={category._id} value={category._id} className={undefined}>
+              <SelectItem key={category._id} value={category._id} className={undefined} >
                 {category.name}
               </SelectItem>
             ))}
@@ -78,18 +108,18 @@ const Dashboard = () => {
           posts.map((post) => (
             <Card
               key={post._id}
-              className={cn('shadow-md bg-white dark:bg-gray-800 border-none')}
+              className={cn('shadow-md bg-white dark:bg-gray-800 dark:text-white border-none')}
             >
               <CardHeader className={undefined}>
                 <CardTitle className="text-gray-800 dark:text-white">
                   {post.title}
                 </CardTitle>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Category: {post.category.name}
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Category: {post.category?.name || 'Uncategorized'}
                 </p>
               </CardHeader>
               <CardContent className={undefined}>
-                <p className="text-gray-600 dark:text-gray-300">
+                <p className="text-gray-600 dark:text-gray-400">
                   {post.content.slice(0, 100)}...
                 </p>
                 <Link
@@ -102,7 +132,7 @@ const Dashboard = () => {
             </Card>
           ))
         ) : (
-          <p className="text-center col-span-full text-gray-600 dark:text-gray-300">
+          <p className="text-center col-span-full text-gray-600 dark:text-gray-400">
             No posts available.{' '}
             <Link to="/create" className="text-blue-500 dark:text-blue-400 hover:underline">
               Create one now!

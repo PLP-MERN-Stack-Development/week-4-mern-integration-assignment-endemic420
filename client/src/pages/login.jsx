@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Input } from '@/components/ui/input';
@@ -10,18 +10,44 @@ const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect only on initial mount if user is logged in
+  useEffect(() => {
+    if (user && window.location.pathname === '/login') {
+      console.log('User already logged in, redirecting to dashboard:', user);
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return; // Prevent multiple submissions
     setLoading(true);
+    setError(null);
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData); // Update URL
-      login(response.data.token, response.data.user);
-      navigate('/dashboard');
+      console.log('Sending login request:', formData);
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email: formData.email.trim(),
+        password: formData.password.trim(),
+      });
+      console.log('Login response:', response.data);
+      if (!response.data?.token || !response.data?.user) {
+        throw new Error('Invalid login response: missing token or user');
+      }
+      await login(response.data.token, response.data.user);
+      console.log('Token stored:', localStorage.getItem('token'));
+      console.log('Navigating to dashboard');
+      navigate('/dashboard', { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to login');
+      console.error('Login error:', {
+        status: err.response?.status,
+        message: err.response?.data?.message,
+        data: err.response?.data,
+        error: err.message,
+      });
+      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
       setLoading(false);
     }
   };
@@ -65,9 +91,9 @@ const Login = () => {
             />
           </div>
           <Button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white" variant={undefined} size={undefined}          >
+            type="submit"
+            disabled={loading || !formData.email || !formData.password}
+            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white" variant={undefined} size={undefined}          >
             {loading ? <FaSpinner className="h-5 w-5 animate-spin" /> : 'Login'}
           </Button>
         </form>

@@ -1,26 +1,55 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
-//checks token and sets req.User
-exports.protect = (req,res,next)=>{
-    const auth =req.headers.authorization;
-    if(!auth || !auth.startsWith("Bearer "))
-        return res.status(401).json({message:"No Token Given"})
-
-    const token = auth.split("")[1];
-    try{
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.User = decoded
-        next()
-    }catch (error){
-        return res.status(403).json({message:"invalid token "});
+module.exports = {
+  auth: async (req, res, next) => {
+    try {
+      // Allow public access to GET /api/posts
+      if (req.method === 'GET' && req.path === '/api/posts') {
+        return next();
+      }
+      const token = req.header('Authorization')?.replace('Bearer ', '');
+      if (!token) {
+        console.log('No token provided in request');
+        return res.status(401).json({ message: 'No token provided' });
+      }
+      const decoded = jwt.verify(token, 'Wantam254');
+      console.log('Decoded JWT:', decoded); // Debug JWT
+      req.user = decoded.user; // Expecting { user: { id, name, role } }
+      if (!req.user?.id) {
+        throw new Error('Invalid token structure: missing user.id');
+      }
+      next();
+    } catch (err) {
+      console.error('Auth middleware error:', {
+        message: err.message,
+        stack: err.stack,
+      });
+      res.status(401).json({ message: 'Invalid token' });
     }
-};
-
-//Check role 
-exports.authorize= (roles) =>{
-    return (req,res,next)=>{
-        if(!roles.includes(req.user.role))
-            return res.status(403).json({message:"Forbidden"});
-        next();
-    };
+  },
+  admin: async (req, res, next) => {
+    try {
+      const token = req.header('Authorization')?.replace('Bearer ', '');
+      if (!token) {
+        console.log('No token provided in admin request');
+        return res.status(401).json({ message: 'No token provided' });
+      }
+      const decoded = jwt.verify(token, 'Wantam254');
+      console.log('Decoded JWT (admin):', decoded); // Debug JWT
+      req.user = decoded.user; // Expecting { user: { id, name, role } }
+      if (!req.user?.id) {
+        throw new Error('Invalid token structure: missing user.id');
+      }
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      next();
+    } catch (err) {
+      console.error('Admin middleware error:', {
+        message: err.message,
+        stack: err.stack,
+      });
+      res.status(401).json({ message: 'Invalid token' });
+    }
+  },
 };

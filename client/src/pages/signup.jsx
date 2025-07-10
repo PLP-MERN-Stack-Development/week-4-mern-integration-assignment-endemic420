@@ -16,12 +16,25 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/signup', formData); // Update URL
+      const response = await axios.post('http://localhost:5000/api/auth/signup', {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password.trim(),
+      });
+      console.log('Signup response:', response.data); // Debug token
+      localStorage.setItem('token', response.data.token); // Ensure token is stored
       login(response.data.token, response.data.user);
+      console.log('Token stored:', localStorage.getItem('token')); // Debug storage
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to signup');
+      console.error('Signup error:', {
+        status: err.response?.status,
+        message: err.response?.data?.message,
+        data: err.response?.data,
+      });
+      setError(err.response?.data?.message || 'Failed to signup. Please try again.');
       setLoading(false);
     }
   };
@@ -43,11 +56,11 @@ const Signup = () => {
               Name
             </label>
             <Input
-                          name="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          placeholder="Enter your name"
-                          className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600" type={undefined}            />
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter your name"
+              className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600" type={undefined}            />
           </div>
           <div>
             <label className="block text-gray-700 dark:text-gray-200 mb-1">
@@ -76,9 +89,9 @@ const Signup = () => {
             />
           </div>
           <Button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white" variant={undefined} size={undefined}          >
+            type="submit"
+            disabled={loading || !formData.name || !formData.email || !formData.password}
+            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white" variant={undefined} size={undefined}          >
             {loading ? <FaSpinner className="h-5 w-5 animate-spin" /> : 'Signup'}
           </Button>
         </form>

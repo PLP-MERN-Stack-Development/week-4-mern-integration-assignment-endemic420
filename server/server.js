@@ -20,7 +20,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -34,11 +34,15 @@ if (process.env.NODE_ENV === 'development') {
     next();
   });
 }
-
-// API routes
-app.use('/api/posts', postRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/auth', authRoutes);
+// Register routes
+try {
+  app.use('/api/auth', require(path.join(__dirname, 'routes', 'authRoutes')));
+  app.use('/api/posts', require(path.join(__dirname, 'routes', 'postRoutes')));
+  app.use('/api/categories', require(path.join(__dirname, 'routes', 'categoryRoutes')));
+} catch (err) {
+  console.error('Route registration error:', err);
+  process.exit(1);
+}
 
 // Root route
 app.get('/', (req, res) => {
@@ -60,7 +64,7 @@ mongoose
   .then(() => {
     console.log('Connected to MongoDB');
     app.listen(PORT, () => {
-      console.log(`Server running on port :https://localhost/${PORT}`);
+      console.log(`Server running on port :https://localhost:${PORT}`);
     });
   })
   .catch((err) => {

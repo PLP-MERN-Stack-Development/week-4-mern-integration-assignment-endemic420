@@ -22,14 +22,20 @@ const Home = () => {
             selectedCategory
               ? `http://localhost:5000/api/posts?categoryId=${selectedCategory}`
               : 'http://localhost:5000/api/posts'
-          ), // Update URL if needed
-          axios.get('http://localhost:5000/api/categories'), // Update URL if needed
+          ),
+          axios.get('http://localhost:5000/api/categories'),
         ]);
         setPosts(postsRes.data);
         setCategories(categoriesRes.data);
         setLoading(false);
       } catch (err) {
-        setError('Failed to fetch data');
+        setError(
+          err.response?.status === 401
+            ? 'Please log in to access posts'
+            : err.response?.status === 404
+            ? 'Categories not found. Please contact an admin.'
+            : 'Failed to fetch data'
+        );
         setLoading(false);
       }
     };
@@ -56,10 +62,10 @@ const Home = () => {
           <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 text-gray-800 dark:text-white">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
-          <SelectContent className={undefined}>
-            <SelectItem value="" className={undefined}>All Categories</SelectItem>
+          <SelectContent className = "">
+            <SelectItem value="" className = "">All Categories</SelectItem>
             {categories.map((category) => (
-              <SelectItem key={category._id} value={category._id} className={undefined} >
+              <SelectItem  className = "" key={category._id} value={category._id}>
                 {category.name}
               </SelectItem>
             ))}
@@ -73,15 +79,15 @@ const Home = () => {
               key={post._id}
               className={cn('shadow-md bg-white dark:bg-gray-800 border-none')}
             >
-              <CardHeader className={undefined}>
+              <CardHeader className = "">
                 <CardTitle className="text-gray-800 dark:text-white">
                   {post.title}
                 </CardTitle>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Category: {post.category.name}
+                  Category: {post.category?.name || 'Uncategorized'}
                 </p>
               </CardHeader>
-              <CardContent className={undefined}>
+              <CardContent className = "">
                 <p className="text-gray-600 dark:text-gray-300">
                   {post.content.slice(0, 100)}...
                 </p>
