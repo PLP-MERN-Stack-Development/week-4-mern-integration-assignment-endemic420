@@ -16,9 +16,12 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  console.log('Dashboard rendering:', { user, isInitialized, loading, error });
+
   // Fetch user posts and categories
   useEffect(() => {
     const fetchData = async () => {
+      console.log('Starting fetchData');
       try {
         const token = localStorage.getItem('token');
         console.log('Token in Dashboard:', token);
@@ -41,6 +44,7 @@ const Dashboard = () => {
         setPosts(postsRes.data);
         setCategories(categoriesRes.data);
         setLoading(false);
+        console.log('fetchData complete, loading set to false');
       } catch (err) {
         console.error('Fetch error:', {
           message: err.message,
@@ -58,9 +62,11 @@ const Dashboard = () => {
           navigate('/login', { replace: true });
         } else {
           setLoading(false);
+          console.log('Non-401 error, loading set to false');
         }
       }
     };
+
     if (isInitialized && user) {
       console.log('Fetching data for user:', user);
       fetchData();
@@ -68,10 +74,13 @@ const Dashboard = () => {
       console.log('No user, redirecting to login');
       setError('Please log in to access the dashboard.');
       navigate('/login', { replace: true });
+    } else {
+      console.log('Waiting for auth initialization');
     }
   }, [user, isInitialized, selectedCategory, logout, navigate]);
 
   if (!isInitialized || loading) {
+    console.log('Rendering loading state');
     return (
       <div className="flex justify-center items-center h-screen">
         <FaSpinner className="h-8 w-8 animate-spin text-gray-600 dark:text-white" />
@@ -80,8 +89,11 @@ const Dashboard = () => {
   }
 
   if (error) {
+    console.log('Rendering error state:', error);
     return <div className="text-center text-red-500 dark:text-red-400">{error}</div>;
   }
+
+  console.log('Rendering dashboard content:', { posts, categories });
 
   return (
     <div className="container mx-auto p-4">
@@ -93,8 +105,8 @@ const Dashboard = () => {
           <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 text-gray-800 dark:text-white">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
-          <SelectContent className={undefined} >
-            <SelectItem value="" className={undefined}>All Categories</SelectItem>
+          <SelectContent className = {undefined}>
+            <SelectItem  className={undefined} >All Categories</SelectItem>
             {categories.map((category) => (
               <SelectItem key={category._id} value={category._id} className={undefined} >
                 {category.name}

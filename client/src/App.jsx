@@ -34,15 +34,15 @@ const App = () => {
             <Route path="/signup" element={<Signup />} />
             <Route
               path="/dashboard"
-              element={<ProtectedRoute element={<Dashboard />} />}
+              element={<ProtectedRoute children ={<Dashboard />} />}
             />
             <Route
               path="/create"
-              element={<ProtectedRoute element={<CreatePost />} />}
+              element={<ProtectedRoute children ={<CreatePost />} />}
             />
             <Route
               path="/edit/:id"
-              element={<ProtectedRoute element={<CreatePost />} />}
+              element={<ProtectedRoute children ={<CreatePost />} />}
             />
             <Route
               path="/categories"

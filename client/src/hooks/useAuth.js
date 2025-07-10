@@ -6,6 +6,7 @@ export const useAuth = () => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   const initializeAuth = useCallback(() => {
+    console.log('Initializing auth');
     const token = localStorage.getItem('token');
     if (token && !isInitialized) {
       try {
@@ -26,6 +27,7 @@ export const useAuth = () => {
       }
     }
     setIsInitialized(true);
+    console.log('Auth initialized, isInitialized:', true);
   }, [isInitialized]);
 
   useEffect(() => {
