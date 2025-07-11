@@ -72,8 +72,9 @@ const CreatePost = () => {
   }
 
   return (
+    <main className = "h-full w-full bg-gray-200 dark:bg-gray-500">
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-300">
         {id ? 'Edit Post' : 'Create Post'}
       </h1>
       <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl mx-auto">
@@ -90,19 +91,19 @@ const CreatePost = () => {
             className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600" type={undefined}          />
         </div>
         <div>
-          <label className="block text-gray-700 dark:text-gray-200 mb-1">
+          <label className="block text-gray-700 dark:text-gray-300 mb-1">
             Category
           </label>
           <Select
             onValueChange={(value) => setFormData({ ...formData, category: value })}
             value={formData.category}
           >
-            <SelectTrigger className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white">
+            <SelectTrigger className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-300 hover:dark:bg-gray-400 hover:dark:text-black">
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
-            <SelectContent className= "bg-transparent">
+            <SelectContent className= "bg-gray-300 dark:bg-gray-400 ">
               {categories.map((category) => (
-                <SelectItem key={category._id} value={category._id} className= "bg-transparent ">
+                <SelectItem key={category._id} value={category._id} className= "bg-gray-300 dark:bg-gray-400 ">
                   {category.name}
                 </SelectItem>
               ))}
@@ -110,7 +111,7 @@ const CreatePost = () => {
           </Select>
         </div>
         <div>
-          <label className="block text-gray-700 dark:text-gray-200 mb-1">
+          <label className="block text-gray-700 dark:text-gray-300 mb-1">
             Content
           </label>
           <Textarea
@@ -119,17 +120,18 @@ const CreatePost = () => {
             onChange={handleChange}
             placeholder="Write your post content..."
             rows={6}
-            className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600"
+            className="bg-white dark:bg-gray-800 text-gray-300 dark:text-white border-gray-300 dark:border-gray-600"
           />
         </div>
         <Button
           type="submit"
           disabled={loading}
-          className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white" variant={undefined} size={undefined}        >
+          className="bg-gray-500 hover:bg-blue-600 dark:bg-gray-600 dark:hover:bg-blue-700 text-gray-900 hover:text-gray-300 dark:hover:text-gray-300 " variant={undefined} size={undefined}        >
           {loading ? <FaSpinner className="h-5 w-5 animate-spin" /> : 'Save Post'}
         </Button>
       </form>
     </div>
+    </main>
   );
 };
 

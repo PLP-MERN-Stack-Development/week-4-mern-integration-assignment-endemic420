@@ -44,6 +44,7 @@ const Signup = () => {
   };
 
   return (
+    <main className = "w-full h-full bg-gray-100 dark:bg-gray-800">
     <div className="container mx-auto p-4 flex justify-center items-center min-h-screen">
       <div className="w-full max-w-md">
         <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white text-center">
@@ -103,6 +104,7 @@ const Signup = () => {
         </p>
       </div>
     </div>
+    </main>
   );
 };
 

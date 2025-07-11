@@ -62,12 +62,9 @@ const Home = () => {
           <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 text-gray-800 dark:text-white">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
-          <SelectContent className = "">
-            <SelectItem value="" className = "">All Categories</SelectItem>
-            {categories.map((category) => (
-              <SelectItem  className = "" key={category._id} value={category._id}>
-                {category.name}
-              </SelectItem>
+          <SelectContent className = "bg-gray-100 dark:bg-gray-700">
+           {categories.map((category) => (
+            <SelectItem key={category._id} value={category.name} className = "bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white">All Categories</SelectItem>
             ))}
           </SelectContent>
         </Select>

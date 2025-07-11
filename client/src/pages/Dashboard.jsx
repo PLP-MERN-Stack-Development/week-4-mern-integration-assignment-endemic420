@@ -96,19 +96,19 @@ const Dashboard = () => {
   console.log('Rendering dashboard content:', { posts, categories });
 
   return (
+    <main className = "body:bg-gray-500 w-full h-full bg-gray-100 dark:bg-gray-400">
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-700">
         Welcome, {user?.name || 'User'}
       </h1>
       <div className="mb-6">
         <Select onValueChange={setSelectedCategory} value={selectedCategory}>
-          <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 text-gray-800 dark:text-white">
-            <SelectValue placeholder="All Categories" />
+          <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 text-gray-800 dark:text-white hover:text-black hover:dark:text-gray-800 hover:dark:bg-gray-300">
+            <SelectValue placeholder="All Categories" className = "" />
           </SelectTrigger>
-          <SelectContent className = {undefined}>
-            <SelectItem  className={undefined} >All Categories</SelectItem>
+          <SelectContent className = "bg-gray-100 dark:bg-gray-700 ">         
             {categories.map((category) => (
-              <SelectItem key={category._id} value={category._id} className={undefined} >
+              <SelectItem key={category._id} value={category.name} className= "bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white hover:text-black hover:dark:text-black hover:bg-gray-100 hover:dark:bg-gray-300" >
                 {category.name}
               </SelectItem>
             ))}
@@ -120,25 +120,25 @@ const Dashboard = () => {
           posts.map((post) => (
             <Card
               key={post._id}
-              className={cn('shadow-md bg-white dark:bg-gray-800 dark:text-white border-none')}
+              className={cn('shadow-md bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white border-none')}
             >
               <CardHeader className={undefined}>
-                <CardTitle className="text-gray-800 dark:text-white">
+                <CardTitle className="text-gray-800 font-w-bold dark:text-white">
                   {post.title}
                 </CardTitle>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Category: {post.category?.name || 'Uncategorized'}
                 </p>
               </CardHeader>
-              <CardContent className={undefined}>
+              <CardContent className = "bg-gray-100 dark:bg-gray-800">
                 <p className="text-gray-600 dark:text-gray-400">
                   {post.content.slice(0, 100)}...
                 </p>
                 <Link
                   to={`/edit/${post._id}`}
-                  className="text-blue-500 dark:text-blue-400 hover:underline mt-2 inline-block"
+                  className="text-gray-400 dark:text-gray-200 hover:underline hover:text-gray-900 hover:dark:text-blue-500 mt-2 inline-block"
                 >
-                  <FaPencilAlt className="h-4 w-4 mr-1 inline" /> Edit
+                  <FaPencilAlt className="h-4 w-4 mr-1 inline text-black" /> Edit
                 </Link>
               </CardContent>
             </Card>
@@ -153,6 +153,7 @@ const Dashboard = () => {
         )}
       </div>
     </div>
+    </main>
   );
 };
 
